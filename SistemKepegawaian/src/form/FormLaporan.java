@@ -129,6 +129,7 @@ public class FormLaporan extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnLaporanAbsensi.setBackground(new java.awt.Color(204, 255, 204));
         btnLaporanAbsensi.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btnLaporanAbsensi.setText("Laporan Absensi ");
         btnLaporanAbsensi.addActionListener(new java.awt.event.ActionListener() {
@@ -137,6 +138,7 @@ public class FormLaporan extends javax.swing.JFrame {
             }
         });
 
+        btnLaporanCuti.setBackground(new java.awt.Color(255, 102, 102));
         btnLaporanCuti.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btnLaporanCuti.setText("Laporan Cuti");
         btnLaporanCuti.addActionListener(new java.awt.event.ActionListener() {
@@ -182,6 +184,7 @@ public class FormLaporan extends javax.swing.JFrame {
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnImport.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/import.png"))); // NOI18N
         btnImport.setText("Import");
         btnImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -190,6 +193,7 @@ public class FormLaporan extends javax.swing.JFrame {
         });
 
         btnExport.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/export.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

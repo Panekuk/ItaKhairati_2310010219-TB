@@ -121,7 +121,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(cbPegawai, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(62, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -141,6 +141,7 @@ public class FormAbsensi extends javax.swing.JFrame {
 
         lblTanggal.setText("Tanggal");
 
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/save.png"))); // NOI18N
         btnSave.setText("Save");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -161,7 +162,7 @@ public class FormAbsensi extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSave)
-                .addGap(88, 88, 88))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -193,6 +194,7 @@ public class FormAbsensi extends javax.swing.JFrame {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/refresh.png"))); // NOI18N
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -200,6 +202,7 @@ public class FormAbsensi extends javax.swing.JFrame {
             }
         });
 
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -260,7 +263,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(36, 36, 36)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(34, 34, 34)
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(45, 45, 45))
                     .addGroup(layout.createSequentialGroup()

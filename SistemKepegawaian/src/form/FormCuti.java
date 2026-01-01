@@ -200,7 +200,7 @@ private void resetForm() {
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
-        btnSave.setText("Save");
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/save.png"))); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
@@ -208,7 +208,7 @@ private void resetForm() {
         });
         jPanel2.add(btnSave);
 
-        btnUpdate.setText("Update");
+        btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/update.png"))); // NOI18N
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateActionPerformed(evt);
@@ -216,7 +216,7 @@ private void resetForm() {
         });
         jPanel2.add(btnUpdate);
 
-        btndelete.setText("Delete");
+        btndelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/delete.png"))); // NOI18N
         btndelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btndeleteActionPerformed(evt);
@@ -224,7 +224,7 @@ private void resetForm() {
         });
         jPanel2.add(btndelete);
 
-        btnExit.setText("Exit");
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/exit.png"))); // NOI18N
         btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnExitActionPerformed(evt);
@@ -258,6 +258,7 @@ private void resetForm() {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -265,6 +266,7 @@ private void resetForm() {
             }
         });
 
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
