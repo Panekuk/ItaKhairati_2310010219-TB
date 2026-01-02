@@ -28,21 +28,21 @@ Digunakan untuk mengelola data pegawai, absensi, cuti, serta laporan kepegawaian
 ### 🔐 Login
 Halaman autentikasi pengguna sebelum masuk ke sistem.
 
-![Login](screenshot/0-login.JPG)
+![Login](SistemKepegawaian/screenshot/0-login.JPG)
 
 ---
 
 ### 🏠 Menu Utama
 Menu utama untuk mengakses seluruh fitur sistem kepegawaian.
 
-![Menu Utama](screenshot/1-menuutama.JPG)
+![Menu Utama](SistemKepegawaian/screenshot/1-menuutama.JPG)
 
 ---
 
 ### 👤 Form Pegawai
 Digunakan untuk mengelola data pegawai seperti tambah, ubah, dan hapus data.
 
-![Form Pegawai](screenshot/5-FormPegawai.JPG)
+![Form Pegawai](SistemKepegawaian/screenshot/5-FormPegawai.JPG)
 
 ---
 
@@ -51,21 +51,21 @@ Pencatatan absensi pegawai dengan fitur:
 - Cegah absen dobel
 - Hitung keterlambatan otomatis
 
-![Form Absensi](screenshot/6-formabsensi.JPG)
+![Form Absensi](SistemKepegawaian/screenshot/6-formabsensi.JPG)
 
 ---
 
 ### 📝 Menu Cuti
 Pengelolaan data cuti pegawai.
 
-![Menu Cuti](screenshot/7-menucuti.JPG)
+![Menu Cuti](SistemKepegawaian/screenshot/7-menucuti.JPG)
 
 ---
 
 ### 📊 Laporan
 Menampilkan laporan absensi dan cuti pegawai dalam bentuk tabel dan PDF.
 
-![Laporan](screenshot/8-laporan.JPG)
+![Laporan](SistemKepegawaian/screenshot/8-laporan.JPG)
 
 ---
 
