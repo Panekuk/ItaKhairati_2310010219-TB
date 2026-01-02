@@ -1,87 +1,142 @@
 package form;
 import koneksi.Koneksi;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import javax.swing.JOptionPane;
+import java.sql.*;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.sql.PreparedStatement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class FormAbsensi extends javax.swing.JFrame {
 
-    Connection conn = Koneksi.getKoneksi();  
-    DefaultTableModel model;                  
-    int idAbsensiTerpilih = 0;
     
+   // ================= ATRIBUT =================
+    private Connection conn = Koneksi.getKoneksi();
+    private DefaultTableModel model;
+    private int idAbsensiTerpilih = 0;
+
+    // ================= CONSTRUCTOR =================
     public FormAbsensi() {
         initComponents();
-         isiPegawai();
+        isiPegawai();
         tampilData();
-    
+        setTanggalOtomatis();
+        new javax.swing.Timer(1000, e -> setTanggalOtomatis()).start();
     }
-    private void isiPegawai() {
-    cbPegawai.removeAllItems();
-    try {
-        String sql = "SELECT id_pegawai, nama FROM pegawai";
-        Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery(sql);
 
-        while (rs.next()) {
-            cbPegawai.addItem(
-                rs.getInt("id_pegawai") + " - " + rs.getString("nama")
-            );
-        }
-    
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, e.getMessage());
+    // ================= UTIL =================
+    private void setTanggalOtomatis() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter fmt =
+                DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss");
+        lblTanggalOtomatis.setText("Hari ini : " + now.format(fmt));
     }
-    }
-    
+
     private int getIdPegawai() {
         String data = cbPegawai.getSelectedItem().toString();
-         return Integer.parseInt(data.split(" - ")[0]);
-       }
-    
+        return Integer.parseInt(data.split(" - ")[0]);
+    }
+
     private void resetForm() {
-    jTanggal.setDate(null);
-    cbStatus.setSelectedIndex(0);
-    idAbsensiTerpilih = 0;
+        cbPegawai.setSelectedIndex(0);
+        cbStatus.setSelectedIndex(0);
+        idAbsensiTerpilih = 0;
     }
-    
-    private void tampilData() {
-    model = new DefaultTableModel();
-    model.addColumn("ID");
-    model.addColumn("Nama");
-    model.addColumn("Tanggal");
-    model.addColumn("Status");
 
-    try {
-        String sql = "SELECT a.id_absensi, p.nama, a.tanggal, a.status " +
-                     "FROM absensi a JOIN pegawai p " +
-                     "ON a.id_pegawai = p.id_pegawai";
+    private String menitKeJam(int menit) {
+        int jam = menit / 60;
+        int sisa = menit % 60;
+        return String.format("%02d:%02d", jam, sisa);
+    }
 
-        Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery(sql);
+    // ================= ISI COMBO =================
+    private void isiPegawai() {
+        cbPegawai.removeAllItems();
+        try {
+            String sql = "SELECT id_pegawai, nama FROM pegawai";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
-        while (rs.next()) {
-            model.addRow(new Object[]{
-                rs.getInt("id_absensi"),
-                rs.getString("nama"),
-                rs.getDate("tanggal"),
-                rs.getString("status")
-            });
+            while (rs.next()) {
+                cbPegawai.addItem(
+                        rs.getInt("id_pegawai") + " - " + rs.getString("nama")
+                );
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
-
-        jTable1.setModel(model);
-
-        // sembunyikan kolom ID
-        jTable1.getColumnModel().getColumn(0).setMinWidth(0);
-        jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, e.getMessage());
     }
-}
+
+    // ================= CEGAH ABSEN DOBEL =================
+    private boolean sudahAbsenHariIni(int idPegawai) {
+        try {
+            String sql =
+            "SELECT COUNT(*) FROM absensi " +
+            "WHERE id_pegawai = ? " +
+            "AND DATE(tanggal) = CURDATE()";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setInt(1, idPegawai);
+            ResultSet rs = pst.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+        return false;
+    }
+
+    // ================= HITUNG TERLAMBAT =================
+    private int hitungMenitTerlambat() {
+        try {
+            String sql =
+            "SELECT TIMESTAMPDIFF(MINUTE, " +
+            "CONCAT(CURDATE(),' 08:00:00'), NOW()) AS terlambat";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            if (rs.next()) {
+                return Math.max(rs.getInt("terlambat"), 0);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+        return 0;
+    }
+
+    // ================= TAMPIL DATA =================
+    private void tampilData() {
+        model = new DefaultTableModel(new String[]{
+            "ID", "Nama", "Tanggal", "Status", "Kehadiran", "Terlambat (Jam)"
+        }, 0);
+
+        try {
+            String sql =
+            "SELECT a.id_absensi, p.nama, a.tanggal, a.status, " +
+            "IFNULL(a.status_hadir,'-'), " +
+            "IFNULL(a.menit_terlambat,0) " +
+            "FROM absensi a " +
+            "JOIN pegawai p ON a.id_pegawai = p.id_pegawai " +
+            "ORDER BY a.tanggal DESC";
+
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt(1),
+                    rs.getString(2),
+                    rs.getTimestamp(3),
+                    rs.getString(4),
+                    rs.getString(5),
+                    menitKeJam(rs.getInt(6))
+                });
+            }
+
+            jTable1.setModel(model);
+            jTable1.getColumnModel().getColumn(0).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -104,8 +159,7 @@ public class FormAbsensi extends javax.swing.JFrame {
         btnDelete = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        lblTanggal = new javax.swing.JLabel();
-        jTanggal = new com.toedter.calendar.JDateChooser();
+        lblTanggalOtomatis = new javax.swing.JLabel();
         tableAbsensi = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jPanel6 = new javax.swing.JPanel();
@@ -119,49 +173,28 @@ public class FormAbsensi extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         lblFormAbsensi.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblFormAbsensi.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblFormAbsensi.setText("FORM ABSENSI");
+        lblFormAbsensi.setFocusable(false);
+        lblFormAbsensi.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblPegawai.setText("Pegawai");
+        jPanel1.add(lblPegawai, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 16, -1, -1));
 
         cbPegawai.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel1.add(cbPegawai, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 13, -1, -1));
 
         lblStatus.setText("Status");
+        jPanel1.add(lblStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 47, -1, -1));
 
         cbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Hadir", "Izin", "Sakit", "Alpha" }));
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblPegawai)
-                    .addComponent(lblStatus))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cbPegawai, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(106, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPegawai)
-                    .addComponent(cbPegawai, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStatus)
-                    .addComponent(cbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        jPanel1.add(cbStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 44, 56, -1));
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jPanel2.setLayout(new java.awt.GridLayout());
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         btnSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/save.png"))); // NOI18N
         btnSave1.setText("Save");
@@ -170,7 +203,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnSave1ActionPerformed(evt);
             }
         });
-        jPanel2.add(btnSave1);
+        jPanel2.add(btnSave1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 2, 114, -1));
 
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/update.png"))); // NOI18N
         btnUpdate.setText("Update");
@@ -179,7 +212,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
-        jPanel2.add(btnUpdate);
+        jPanel2.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(116, 2, 114, -1));
 
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/delete.png"))); // NOI18N
         btnDelete.setText("Delete");
@@ -188,7 +221,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnDeleteActionPerformed(evt);
             }
         });
-        jPanel2.add(btnDelete);
+        jPanel2.add(btnDelete, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 2, 114, -1));
 
         btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/exit.png"))); // NOI18N
         btnExit.setText("Exit");
@@ -197,32 +230,13 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnExitActionPerformed(evt);
             }
         });
-        jPanel2.add(btnExit);
+        jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(344, 2, 114, -1));
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblTanggal.setText("Tanggal");
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblTanggal)
-                .addGap(18, 18, 18)
-                .addComponent(jTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(42, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTanggal))
-                .addContainerGap(42, Short.MAX_VALUE))
-        );
+        lblTanggalOtomatis.setText("Tanggal Otomatis");
+        jPanel3.add(lblTanggalOtomatis, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, 20));
 
         tableAbsensi.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -244,6 +258,7 @@ public class FormAbsensi extends javax.swing.JFrame {
         tableAbsensi.setViewportView(jTable1);
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/refresh.png"))); // NOI18N
         btnRefresh.setText("Refresh");
@@ -252,6 +267,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnRefreshActionPerformed(evt);
             }
         });
+        jPanel6.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 10, -1, -1));
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -260,40 +276,14 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnSearchActionPerformed(evt);
             }
         });
+        jPanel6.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 10, 73, -1));
 
         jLabel6.setText("Kategori");
+        jPanel6.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         cbKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pegawai", "Status", "Tanggal" }));
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cbKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
-                .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnRefresh)
-                .addContainerGap(19, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbKategori, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6)
-                    .addComponent(btnSearch)
-                    .addComponent(btnRefresh))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        jPanel6.add(cbKategori, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 10, 140, -1));
+        jPanel6.add(txtSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 10, 190, -1));
 
         lblDataAbsensi.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         lblDataAbsensi.setText("DATA ABSENSI");
@@ -303,50 +293,45 @@ public class FormAbsensi extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 519, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(tableAbsensi)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addContainerGap())))
-            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(191, 191, 191)
+                        .addGap(120, 120, 120)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(53, 53, 53)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(tableAbsensi)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(284, 284, 284)
                         .addComponent(lblFormAbsensi))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(214, 214, 214)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(289, 289, 289)
                         .addComponent(lblDataAbsensi)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(10, 10, 10)
                 .addComponent(lblFormAbsensi)
-                .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblDataAbsensi)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tableAbsensi, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         pack();
@@ -415,16 +400,42 @@ public class FormAbsensi extends javax.swing.JFrame {
     }//GEN-LAST:event_tableAbsensiMouseClicked
 
     private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
-         try {
-        String sql = "INSERT INTO absensi (id_pegawai, tanggal, status) VALUES (?, ?, ?)";
+         if (cbPegawai.getSelectedItem() == null) {
+        JOptionPane.showMessageDialog(this, "Pegawai belum dipilih!");
+        return;
+    }
+
+    int idPegawai = getIdPegawai();
+
+    // Cegah absen dobel
+    if (sudahAbsenHariIni(idPegawai)) {
+        JOptionPane.showMessageDialog(this,
+            "Pegawai ini sudah absen hari ini!",
+            "Peringatan",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    int menitTerlambat = hitungMenitTerlambat();
+    String statusHadir = (menitTerlambat > 0) ? "TERLAMBAT" : "HADIR";
+
+    try {
+        String sql = "INSERT INTO absensi "
+                   + "(id_pegawai, tanggal, status, status_hadir, menit_terlambat) "
+                   + "VALUES (?, NOW(), ?, ?, ?)";
+
         PreparedStatement pst = conn.prepareStatement(sql);
-
-        pst.setInt(1, getIdPegawai());
-        pst.setDate(2, new java.sql.Date(jTanggal.getDate().getTime()));
-        pst.setString(3, cbStatus.getSelectedItem().toString());
-
+        pst.setInt(1, idPegawai);
+        pst.setString(2, cbStatus.getSelectedItem().toString());
+        pst.setString(3, statusHadir);
+        pst.setInt(4, menitTerlambat);
         pst.executeUpdate();
-        JOptionPane.showMessageDialog(this, "Absensi berhasil disimpan");
+
+        JOptionPane.showMessageDialog(this,
+            "Absensi berhasil\n"
+          + "Status: " + statusHadir +
+            (menitTerlambat > 0 ? "\nTerlambat: " + menitTerlambat + " menit" : "")
+        );
 
         tampilData();
         resetForm();
@@ -513,12 +524,11 @@ public class FormAbsensi extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JTable jTable1;
-    private com.toedter.calendar.JDateChooser jTanggal;
     private javax.swing.JLabel lblDataAbsensi;
     private javax.swing.JLabel lblFormAbsensi;
     private javax.swing.JLabel lblPegawai;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JLabel lblTanggal;
+    private javax.swing.JLabel lblTanggalOtomatis;
     private javax.swing.JScrollPane tableAbsensi;
     private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables

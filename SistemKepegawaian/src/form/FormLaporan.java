@@ -100,7 +100,7 @@ public class FormLaporan extends javax.swing.JFrame {
 
     try {
         DefaultTableModel model = (DefaultTableModel) tableLaporan.getModel();
-        String kop = "LAPORAN ABSENSI & CUTI TELKOM";
+        String kop = "LAPORAN ABSENSI & CUTI PEGAWAI";
         String tanggal = "Tanggal Export: " + java.time.LocalDate.now();
 
         switch (pilih) {
