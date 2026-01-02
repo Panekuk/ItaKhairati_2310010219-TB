@@ -208,14 +208,14 @@ private void resetForm() {
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/refresh.png"))); // NOI18N
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRefreshActionPerformed(evt);
             }
         });
-        jPanel6.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(461, 13, -1, -1));
+        jPanel6.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 10, -1, -1));
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -224,7 +224,7 @@ private void resetForm() {
                 btnSearchActionPerformed(evt);
             }
         });
-        jPanel6.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(366, 13, -1, -1));
+        jPanel6.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 100, -1));
 
         jLabel7.setText("Kategori");
         jPanel6.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 18, -1, -1));
@@ -310,6 +310,8 @@ private void resetForm() {
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
          tampilData();
+         resetForm();
+         txtSearch.setText(""); 
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed

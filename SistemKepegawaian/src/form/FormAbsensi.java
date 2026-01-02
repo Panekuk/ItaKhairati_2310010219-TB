@@ -129,9 +129,9 @@ public class FormAbsensi extends javax.swing.JFrame {
                 });
             }
 
-            jTable1.setModel(model);
-            jTable1.getColumnModel().getColumn(0).setMinWidth(0);
-            jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
+            jTabelAbsen.setModel(model);
+            jTabelAbsen.getColumnModel().getColumn(0).setMinWidth(0);
+            jTabelAbsen.getColumnModel().getColumn(0).setMaxWidth(0);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -161,7 +161,7 @@ public class FormAbsensi extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         lblTanggalOtomatis = new javax.swing.JLabel();
         tableAbsensi = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTabelAbsen = new javax.swing.JTable();
         jPanel6 = new javax.swing.JPanel();
         btnRefresh = new javax.swing.JButton();
         btnSearch = new javax.swing.JButton();
@@ -238,13 +238,7 @@ public class FormAbsensi extends javax.swing.JFrame {
         lblTanggalOtomatis.setText("Tanggal Otomatis");
         jPanel3.add(lblTanggalOtomatis, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, 20));
 
-        tableAbsensi.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tableAbsensiMouseClicked(evt);
-            }
-        });
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTabelAbsen.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -255,7 +249,12 @@ public class FormAbsensi extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        tableAbsensi.setViewportView(jTable1);
+        jTabelAbsen.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTabelAbsenMouseClicked(evt);
+            }
+        });
+        tableAbsensi.setViewportView(jTabelAbsen);
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -267,7 +266,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnRefreshActionPerformed(evt);
             }
         });
-        jPanel6.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 10, -1, -1));
+        jPanel6.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 10, -1, -1));
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/search_icon-icons.com_52389.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -276,7 +275,7 @@ public class FormAbsensi extends javax.swing.JFrame {
                 btnSearchActionPerformed(evt);
             }
         });
-        jPanel6.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 10, 73, -1));
+        jPanel6.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 10, 90, -1));
 
         jLabel6.setText("Kategori");
         jPanel6.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
@@ -339,6 +338,8 @@ public class FormAbsensi extends javax.swing.JFrame {
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
     tampilData();
+    resetForm();
+    txtSearch.setText("");
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
@@ -376,28 +377,16 @@ public class FormAbsensi extends javax.swing.JFrame {
             });
         }
 
-        jTable1.setModel(model);
+        jTabelAbsen.setModel(model);
 
         // sembunyikan ID
-        jTable1.getColumnModel().getColumn(0).setMinWidth(0);
-        jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
+        jTabelAbsen.getColumnModel().getColumn(0).setMinWidth(0);
+        jTabelAbsen.getColumnModel().getColumn(0).setMaxWidth(0);
 
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this, e.getMessage());
     }
     }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void tableAbsensiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableAbsensiMouseClicked
-        int row = jTable1.getSelectedRow();
-
-    idAbsensiTerpilih = Integer.parseInt(
-        jTable1.getValueAt(row, 0).toString()
-    );
-
-    cbStatus.setSelectedItem(
-        jTable1.getValueAt(row, 3).toString()
-    );
-    }//GEN-LAST:event_tableAbsensiMouseClicked
 
     private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
          if (cbPegawai.getSelectedItem() == null) {
@@ -503,6 +492,22 @@ public class FormAbsensi extends javax.swing.JFrame {
        dispose();
     }//GEN-LAST:event_btnExitActionPerformed
 
+    private void jTabelAbsenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTabelAbsenMouseClicked
+          int row = jTabelAbsen.getSelectedRow();
+
+    if (row == -1) return;
+
+    idAbsensiTerpilih = Integer.parseInt(
+        jTabelAbsen.getValueAt(row, 0).toString()
+    );
+
+    cbStatus.setSelectedItem(
+        jTabelAbsen.getValueAt(row, 3).toString()
+    );
+
+    System.out.println("ID ABSENSI TERPILIH: " + idAbsensiTerpilih);
+    }//GEN-LAST:event_jTabelAbsenMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -523,7 +528,7 @@ public class FormAbsensi extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTabelAbsen;
     private javax.swing.JLabel lblDataAbsensi;
     private javax.swing.JLabel lblFormAbsensi;
     private javax.swing.JLabel lblPegawai;
