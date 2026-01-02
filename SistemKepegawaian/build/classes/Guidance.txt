@@ -1,0 +1,13 @@
+import database : 
+--folder database -> kepegawaian.sql
+
+Login Aplikasi 
+--user & pass : admin
+
+untuk menampilkan/ cetak Laporan memerlukan 
+
+lalu tambahkan komponen jCalendar,openpdf, poi-5.4.1.jar, poi-ooxml-5.1.1 jar, mysql-connector-j-8,0.33 jar : 
+--klik kanan libraries -> add JAR/Folder -> pilih folder src/comp
+
+tambahkan Swing jCalendar, jDateChooser : 
+--klik kanan Swing -> palete Manager ->add from JAR -> src/comp/jCalendar.jar ->lalu pilih jCalendar dan jDateChooser

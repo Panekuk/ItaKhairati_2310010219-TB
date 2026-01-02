@@ -1,14 +1,23 @@
 package form;
+
 import koneksi.Koneksi;
 import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.io.File;/**
- *
- * @author Lenovo
- */
-public class FormLaporan extends javax.swing.JFrame {
+import java.io.*;
 
+// OpenPDF
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+
+// Apache POI
+import org.apache.poi.xwpf.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+
+public class FormLaporan extends javax.swing.JFrame {
+    
      Connection conn = Koneksi.getKoneksi();
 
     public FormLaporan() {
@@ -70,39 +79,350 @@ public class FormLaporan extends javax.swing.JFrame {
     }
 // ================= EXPORT =================
     private void exportData() {
-        String[] pilihan = {"PDF", "Word", "Excel"};
-        int pilih = JOptionPane.showOptionDialog(
-                this,
-                "Pilih format export",
-                "Export Laporan",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                pilihan,
-                pilihan[0]
-        );
+    String[] pilihan = {"PDF", "Word", "Excel", "TXT"};
+    int pilih = JOptionPane.showOptionDialog(
+            this,
+            "Pilih format export",
+            "Export Laporan",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.INFORMATION_MESSAGE,
+            null,
+            pilihan,
+            pilihan[0]
+    );
 
-        if (pilih == 0) {
-            JOptionPane.showMessageDialog(this, "Export PDF berhasil (simulasi)");
-        } else if (pilih == 1) {
-            JOptionPane.showMessageDialog(this, "Export Word berhasil (simulasi)");
-        } else if (pilih == 2) {
-            JOptionPane.showMessageDialog(this, "Export Excel berhasil (simulasi)");
+    if (pilih == -1) return; // batal
+
+    JFileChooser fc = new JFileChooser();
+    int hasil = fc.showSaveDialog(this);
+    if (hasil != JFileChooser.APPROVE_OPTION) return;
+    File file = fc.getSelectedFile();
+
+    try {
+        DefaultTableModel model = (DefaultTableModel) tableLaporan.getModel();
+        String kop = "LAPORAN ABSENSI & CUTI TELKOM";
+        String tanggal = "Tanggal Export: " + java.time.LocalDate.now();
+
+        switch (pilih) {
+           // ================= PDF =================
+case 0:
+    com.lowagie.text.Document document =
+            new com.lowagie.text.Document(PageSize.A4, 36, 36, 54, 36);
+    PdfWriter.getInstance(document, new FileOutputStream(file + ".pdf"));
+    document.open();
+
+    // ===== FONT PDF (SATU KALI, AMAN) =====
+    com.lowagie.text.Font fontKop =
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+
+    com.lowagie.text.Font fontTanggal =
+            FontFactory.getFont(FontFactory.HELVETICA, 12);
+
+    com.lowagie.text.Font fontHeader =
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+
+    com.lowagie.text.Font fontData =
+            FontFactory.getFont(FontFactory.HELVETICA, 11);
+
+    // ===== KOP =====
+    Paragraph header = new Paragraph(kop, fontKop);
+    header.setAlignment(Element.ALIGN_CENTER);
+    document.add(header);
+
+    // ===== TANGGAL =====
+    Paragraph subHeader = new Paragraph(tanggal, fontTanggal);
+    subHeader.setAlignment(Element.ALIGN_CENTER);
+    subHeader.setSpacingAfter(15f);
+    document.add(subHeader);
+
+    // ===== TABEL =====
+    PdfPTable pdfTable = new PdfPTable(model.getColumnCount());
+    pdfTable.setWidthPercentage(100);
+    pdfTable.setSpacingBefore(10f);
+
+    // Header tabel
+    for (int i = 0; i < model.getColumnCount(); i++) {
+        PdfPCell cell =
+                new PdfPCell(new Phrase(model.getColumnName(i), fontHeader));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(6f);
+        pdfTable.addCell(cell);
+    }
+
+    // Data tabel
+    for (int i = 0; i < model.getRowCount(); i++) {
+        for (int j = 0; j < model.getColumnCount(); j++) {
+            PdfPCell cell =
+                    new PdfPCell(new Phrase(
+                            model.getValueAt(i, j).toString(),
+                            fontData
+                    ));
+            cell.setPadding(6f);
+            pdfTable.addCell(cell);
         }
     }
+
+    document.add(pdfTable);
+    document.close();
+
+    JOptionPane.showMessageDialog(this, "Export PDF berhasil!");
+    break;
+
+            // ================= Word =================
+            case 1:
+                XWPFDocument doc = new XWPFDocument();
+
+                // Kop
+                XWPFParagraph pKop = doc.createParagraph();
+                pKop.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun runKop = pKop.createRun();
+                runKop.setBold(true);
+                runKop.setFontSize(16);
+                runKop.setText(kop);
+
+                // Tanggal
+                XWPFParagraph pTanggal = doc.createParagraph();
+                pTanggal.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun runTanggal = pTanggal.createRun();
+                runTanggal.setFontSize(12);
+                runTanggal.setText(tanggal);
+                pTanggal.setSpacingAfter(200);
+
+                // Tabel
+                XWPFTable table = doc.createTable();
+
+                // Header tabel
+                XWPFTableRow headerRow = table.getRow(0);
+                for (int i = 0; i < model.getColumnCount(); i++) {
+                    XWPFTableCell cell;
+                    if (i == 0) {
+                        cell = headerRow.getCell(0);
+                    } else {
+                        cell = headerRow.addNewTableCell();
+                    }
+                    cell.setText(model.getColumnName(i));
+                    XWPFParagraph para = cell.getParagraphs().get(0);
+                    para.setAlignment(ParagraphAlignment.CENTER);
+                    XWPFRun run = para.createRun();
+                    run.setBold(true);
+                    cell.setColor("DCDCDC"); // shading abu-abu
+                }
+
+                // Data tabel
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    XWPFTableRow row = table.createRow();
+                    for (int j = 0; j < model.getColumnCount(); j++) {
+                        XWPFTableCell cell = row.getCell(j);
+                        if (cell == null) cell = row.createCell();
+                        cell.setText(model.getValueAt(i, j).toString());
+                        XWPFParagraph para = cell.getParagraphs().get(0);
+                        para.setAlignment(ParagraphAlignment.LEFT);
+                    }
+                }
+
+                FileOutputStream fosWord = new FileOutputStream(file + ".docx");
+                doc.write(fosWord);
+                fosWord.close();
+                doc.close();
+                JOptionPane.showMessageDialog(this, "Export Word berhasil!");
+                break;
+
+            // ================= Excel =================
+           case 2:
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet = workbook.createSheet("Laporan");
+            int rowIndex = 0;
+
+            // ===== STYLE KOP =====
+             XSSFCellStyle styleKop = workbook.createCellStyle();
+             XSSFFont fontKopExcel = workbook.createFont();
+             fontKopExcel.setBold(true);
+             fontKopExcel.setFontHeightInPoints((short)16);
+             styleKop.setFont(fontKopExcel);
+             styleKop.setAlignment(HorizontalAlignment.CENTER);
+
+             // ===== STYLE TANGGAL =====
+             XSSFCellStyle styleTanggal = workbook.createCellStyle();
+             XSSFFont fontTanggalExcel = workbook.createFont();
+             fontTanggalExcel.setFontHeightInPoints((short)12);
+             styleTanggal.setFont(fontTanggalExcel);
+             styleTanggal.setAlignment(HorizontalAlignment.CENTER);
+
+            // ===== STYLE HEADER =====
+             XSSFCellStyle styleHeader = workbook.createCellStyle();
+             XSSFFont fontHeaderExcel = workbook.createFont();
+            fontHeaderExcel.setBold(true);
+            styleHeader.setFont(fontHeaderExcel);
+            styleHeader.setAlignment(HorizontalAlignment.CENTER);
+            styleHeader.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            styleHeader.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleHeader.setBorderBottom(BorderStyle.THIN);
+            styleHeader.setBorderTop(BorderStyle.THIN);
+            styleHeader.setBorderLeft(BorderStyle.THIN);
+            styleHeader.setBorderRight(BorderStyle.THIN);
+
+            // ===== KOP =====
+            XSSFRow kopRow = sheet.createRow(rowIndex++);
+            XSSFCell kopCell = kopRow.createCell(0);
+            kopCell.setCellValue(kop);
+            kopCell.setCellStyle(styleKop);
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, model.getColumnCount() - 1));
+
+             // ===== TANGGAL =====
+            XSSFRow tanggalRow = sheet.createRow(rowIndex++);
+            XSSFCell tanggalCell = tanggalRow.createCell(0);
+            tanggalCell.setCellValue(tanggal);
+            tanggalCell.setCellStyle(styleTanggal);
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, model.getColumnCount() - 1));
+
+             rowIndex++;
+    
+             // ===== HEADER TABEL =====
+            XSSFRow rowHeader = sheet.createRow(rowIndex++);
+             for (int i = 0; i < model.getColumnCount(); i++) {
+             XSSFCell cell = rowHeader.createCell(i);
+             cell.setCellValue(model.getColumnName(i));
+             cell.setCellStyle(styleHeader);
+             }
+
+            // ===== DATA =====
+            for (int i = 0; i < model.getRowCount(); i++) {
+             XSSFRow row = sheet.createRow(rowIndex++);
+             for (int j = 0; j < model.getColumnCount(); j++) {
+            row.createCell(j).setCellValue(model.getValueAt(i, j).toString());
+                 }
+            }
+
+            for (int i = 0; i < model.getColumnCount(); i++) {
+             sheet.autoSizeColumn(i);
+             }
+
+            FileOutputStream fosExcel = new FileOutputStream(file + ".xlsx");
+             workbook.write(fosExcel);
+             fosExcel.close();
+            workbook.close();
+
+            JOptionPane.showMessageDialog(this, "Export Excel berhasil!");
+         break;
+            
+            // ================= TXT =================
+            case 3:
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file + ".txt"));
+
+                // Kop dan tanggal
+                bw.write(kop);
+                bw.newLine();
+                bw.write(tanggal);
+                bw.newLine();
+                bw.newLine();
+
+                // Header tabel
+                for (int i = 0; i < model.getColumnCount(); i++) {
+                    bw.write(model.getColumnName(i) + "\t");
+                }
+                bw.newLine();
+
+                // Garis pemisah
+                for (int i = 0; i < model.getColumnCount(); i++) {
+                    bw.write("--------\t");
+                }
+                bw.newLine();
+
+                // Data tabel
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    for (int j = 0; j < model.getColumnCount(); j++) {
+                        bw.write(model.getValueAt(i, j).toString() + "\t");
+                    }
+                    bw.newLine();
+                }
+
+                bw.close();
+                JOptionPane.showMessageDialog(this, "Export TXT berhasil!");
+                break;
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    }
+}
+
 
     // ================= IMPORT =================
-    private void importData() {
-        JFileChooser fc = new JFileChooser();
-        int hasil = fc.showOpenDialog(this);
+      private void importData() {
+    JFileChooser fc = new JFileChooser();
+    int hasil = fc.showOpenDialog(this);
+    if (hasil != JFileChooser.APPROVE_OPTION) return;
+    File file = fc.getSelectedFile();
 
-        if (hasil == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            JOptionPane.showMessageDialog(this,
-                    "Import dari file:\n" + file.getName() +
-                    "\n(Simulasi – Excel)");
+    String fileName = file.getName().toLowerCase();
+    DefaultTableModel model = new DefaultTableModel();
+
+    try {
+        if (fileName.endsWith(".txt")) {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            boolean headerDone = false;
+
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue; // skip baris kosong
+                if (line.startsWith("LAPORAN") || line.startsWith("Tanggal Export")) continue; // skip kop & tanggal
+                if (line.startsWith("--------")) continue; // skip garis pemisah
+
+                String[] data = line.split("\t");
+
+                if (!headerDone) {
+                    // baris pertama yang tersisa dianggap header
+                    for (String col : data) model.addColumn(col);
+                    headerDone = true;
+                } else {
+                    // baris data
+                    model.addRow(data);
+                }
+            }
+            br.close();
+
+        } else if (fileName.endsWith(".xlsx")) {
+            XSSFWorkbook workbook = new XSSFWorkbook(file);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            boolean headerDone = false;
+
+            for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+                XSSFRow row = sheet.getRow(i);
+                if (row == null) continue;
+
+                // Lewati baris kop & tanggal (asumsikan 2 baris pertama)
+                if (i < 2) continue;
+
+                // Baris header tabel
+                if (!headerDone) {
+                    for (int j = 0; j < row.getLastCellNum(); j++) {
+                        model.addColumn(row.getCell(j).toString());
+                    }
+                    headerDone = true;
+                } else {
+                    Object[] rowData = new Object[row.getLastCellNum()];
+                    for (int j = 0; j < row.getLastCellNum(); j++) {
+                        XSSFCell cell = row.getCell(j);
+                        rowData[j] = (cell == null ? "" : cell.toString());
+                    }
+                    model.addRow(rowData);
+                }
+            }
+            workbook.close();
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Format file tidak didukung!");
+            return;
         }
+
+        tableLaporan.setModel(model);
+        JOptionPane.showMessageDialog(this, "Import berhasil dari file: " + file.getName());
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
     }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
