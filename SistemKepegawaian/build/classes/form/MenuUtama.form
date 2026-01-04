@@ -17,6 +17,21 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuPegawaiActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="menuJabatan">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Jabatan"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuJabatanActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="menuTransaksi">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Transaksi"/>
+          </Properties>
+          <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="menuAbsensi">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Absensi"/>
@@ -40,12 +55,20 @@
             <Property name="text" type="java.lang.String" value="Laporan"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="menuLaporan">
+            <MenuItem class="javax.swing.JMenuItem" name="menuLaporanAbsensi">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Laporan Absensi&amp;Cuti"/>
+                <Property name="text" type="java.lang.String" value="Laporan Absensi"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuLaporanActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuLaporanAbsensiActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="menuLaporanCuti">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Laporan Cuti"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuLaporanCutiActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

@@ -25,10 +25,13 @@ public class MenuUtama extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jData = new javax.swing.JMenu();
         menuPegawai = new javax.swing.JMenuItem();
+        menuJabatan = new javax.swing.JMenuItem();
+        menuTransaksi = new javax.swing.JMenu();
         menuAbsensi = new javax.swing.JMenuItem();
         menuCuti = new javax.swing.JMenuItem();
         jLaporan = new javax.swing.JMenu();
-        menuLaporan = new javax.swing.JMenuItem();
+        menuLaporanAbsensi = new javax.swing.JMenuItem();
+        menuLaporanCuti = new javax.swing.JMenuItem();
         jExit = new javax.swing.JMenu();
         MenuKeluar = new javax.swing.JMenuItem();
 
@@ -75,13 +78,25 @@ public class MenuUtama extends javax.swing.JFrame {
         });
         jData.add(menuPegawai);
 
+        menuJabatan.setText("Jabatan");
+        menuJabatan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuJabatanActionPerformed(evt);
+            }
+        });
+        jData.add(menuJabatan);
+
+        jMenuBar1.add(jData);
+
+        menuTransaksi.setText("Transaksi");
+
         menuAbsensi.setText("Absensi");
         menuAbsensi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuAbsensiActionPerformed(evt);
             }
         });
-        jData.add(menuAbsensi);
+        menuTransaksi.add(menuAbsensi);
 
         menuCuti.setText("Cuti");
         menuCuti.addActionListener(new java.awt.event.ActionListener() {
@@ -89,19 +104,27 @@ public class MenuUtama extends javax.swing.JFrame {
                 menuCutiActionPerformed(evt);
             }
         });
-        jData.add(menuCuti);
+        menuTransaksi.add(menuCuti);
 
-        jMenuBar1.add(jData);
+        jMenuBar1.add(menuTransaksi);
 
         jLaporan.setText("Laporan");
 
-        menuLaporan.setText("Laporan Absensi&Cuti");
-        menuLaporan.addActionListener(new java.awt.event.ActionListener() {
+        menuLaporanAbsensi.setText("Laporan Absensi");
+        menuLaporanAbsensi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuLaporanActionPerformed(evt);
+                menuLaporanAbsensiActionPerformed(evt);
             }
         });
-        jLaporan.add(menuLaporan);
+        jLaporan.add(menuLaporanAbsensi);
+
+        menuLaporanCuti.setText("Laporan Cuti");
+        menuLaporanCuti.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuLaporanCutiActionPerformed(evt);
+            }
+        });
+        jLaporan.add(menuLaporanCuti);
 
         jMenuBar1.add(jLaporan);
 
@@ -151,11 +174,11 @@ public class MenuUtama extends javax.swing.JFrame {
          cuti.setLocationRelativeTo(null);
     }//GEN-LAST:event_menuCutiActionPerformed
 
-    private void menuLaporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanActionPerformed
-       FormLaporan laporan = new FormLaporan();
+    private void menuLaporanAbsensiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanAbsensiActionPerformed
+       FormLaporanAbsensi laporan = new FormLaporanAbsensi();
         laporan.setVisible(true);
         laporan.setLocationRelativeTo(null);
-    }//GEN-LAST:event_menuLaporanActionPerformed
+    }//GEN-LAST:event_menuLaporanAbsensiActionPerformed
 
     private void MenuKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuKeluarActionPerformed
         int pilihan = JOptionPane.showConfirmDialog(this, 
@@ -167,6 +190,18 @@ public class MenuUtama extends javax.swing.JFrame {
         System.exit(0);
     }
     }//GEN-LAST:event_MenuKeluarActionPerformed
+
+    private void menuLaporanCutiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanCutiActionPerformed
+        FormLaporanCuti laporan = new FormLaporanCuti();
+        laporan.setVisible(true);
+        laporan.setLocationRelativeTo(null);
+    }//GEN-LAST:event_menuLaporanCutiActionPerformed
+
+    private void menuJabatanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuJabatanActionPerformed
+       FormJabatan jabatan = new FormJabatan();
+        jabatan.setVisible(true);
+        jabatan.setLocationRelativeTo(null); 
+    }//GEN-LAST:event_menuJabatanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -184,7 +219,10 @@ public class MenuUtama extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JMenuItem menuAbsensi;
     private javax.swing.JMenuItem menuCuti;
-    private javax.swing.JMenuItem menuLaporan;
+    private javax.swing.JMenuItem menuJabatan;
+    private javax.swing.JMenuItem menuLaporanAbsensi;
+    private javax.swing.JMenuItem menuLaporanCuti;
     private javax.swing.JMenuItem menuPegawai;
+    private javax.swing.JMenu menuTransaksi;
     // End of variables declaration//GEN-END:variables
 }
