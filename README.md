@@ -1,4 +1,5 @@
 # 📌 Sistem Kepegawaian
+watch here : https://youtu.be/w9PBfJculSU?si=9lBtF3UPpN9hB5IO
 
 Aplikasi **Sistem Kepegawaian** berbasis **Java Desktop (Swing + JDBC)**  
 Digunakan untuk mengelola data pegawai, absensi, cuti, serta laporan kepegawaian.
