@@ -226,7 +226,7 @@ private void importDataSimple() {
         lblLaporanCuti = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         btnLaporanCuti = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -315,11 +315,11 @@ private void importDataSimple() {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/exit.png"))); // NOI18N
-        jButton1.setText("Exit");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/form/Icons/exit.png"))); // NOI18N
+        btnExit.setText("Exit");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnExitActionPerformed(evt);
             }
         });
 
@@ -345,7 +345,7 @@ private void importDataSimple() {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addComponent(btnExit)
                 .addGap(19, 19, 19))
         );
         layout.setVerticalGroup(
@@ -360,7 +360,7 @@ private void importDataSimple() {
                 .addGap(33, 33, 33)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1)
+                .addComponent(btnExit)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -379,16 +379,16 @@ private void importDataSimple() {
         tampilCuti();
     }//GEN-LAST:event_btnLaporanCutiActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+       dispose();
+    }//GEN-LAST:event_btnExitActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnExportCuti;
     private javax.swing.JButton btnImportCuti;
     private javax.swing.JButton btnLaporanCuti;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
