@@ -57,7 +57,7 @@ public class FormLaporanCuti extends javax.swing.JFrame {
 
     // ================= EXPORT =================
     private void exportData() {
-        String[] opsi = {"PDF", "Excel (.xls)", "TXT"};
+        String[] opsi = {"PDF", "Word (.doc)","Excel (.xls)", "TXT"};
         int pilih = JOptionPane.showOptionDialog(
                 this, "Pilih format", "Export",
                 JOptionPane.DEFAULT_OPTION,
@@ -74,7 +74,20 @@ public class FormLaporanCuti extends javax.swing.JFrame {
         String tanggal = "Tanggal: " + LocalDate.now();
 
         try {
-            switch (pilih) {
+    switch (pilih) {
+    case 0:
+        exportPDF(file, judul, tanggal);
+        break;
+    case 1:
+        exportHTML(file, judul, tanggal, ".doc"); // Word
+        break;
+    case 2:
+        exportHTML(file, judul, tanggal, ".xls"); // Excel
+        break;
+    case 3:
+        exportTXT(file, judul, tanggal);
+        break;
+}        switch (pilih) {
                 case 0:
                     exportPDF(file, judul, tanggal);
                     break;
@@ -278,7 +291,7 @@ private void importDataSimple() {
 
         btnLaporanCuti.setBackground(new java.awt.Color(204, 255, 204));
         btnLaporanCuti.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnLaporanCuti.setText("Laporan Absensi ");
+        btnLaporanCuti.setText("Laporan Cuti ");
         btnLaporanCuti.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLaporanCutiActionPerformed(evt);

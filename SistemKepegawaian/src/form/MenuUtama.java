@@ -24,8 +24,8 @@ public class MenuUtama extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jData = new javax.swing.JMenu();
-        menuPegawai = new javax.swing.JMenuItem();
         menuJabatan = new javax.swing.JMenuItem();
+        menuPegawai = new javax.swing.JMenuItem();
         menuTransaksi = new javax.swing.JMenu();
         menuAbsensi = new javax.swing.JMenuItem();
         menuCuti = new javax.swing.JMenuItem();
@@ -70,14 +70,6 @@ public class MenuUtama extends javax.swing.JFrame {
 
         jData.setText("Data");
 
-        menuPegawai.setText("Pegawai");
-        menuPegawai.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuPegawaiActionPerformed(evt);
-            }
-        });
-        jData.add(menuPegawai);
-
         menuJabatan.setText("Jabatan");
         menuJabatan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -85,6 +77,14 @@ public class MenuUtama extends javax.swing.JFrame {
             }
         });
         jData.add(menuJabatan);
+
+        menuPegawai.setText("Pegawai");
+        menuPegawai.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuPegawaiActionPerformed(evt);
+            }
+        });
+        jData.add(menuPegawai);
 
         jMenuBar1.add(jData);
 
